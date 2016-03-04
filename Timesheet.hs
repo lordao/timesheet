@@ -1,5 +1,7 @@
 module Timesheet where
 
+import Text.Regex
+
 import System.Environment
 import System.Exit
 import System.IO
@@ -38,3 +40,16 @@ gitLog date author path = do
       , "--reverse"
       , "--pretty=oneline"
       ]
+
+formatLog :: String -> String
+formatLog = unlinesHTML . map splitFeatures . lines . makeHeader . trimSpaces
+
+unlinesHTML [] = ""
+unlinesHTML (x:xs) = x ++ "<br/>\n" ++ unlinesHTML xs
+
+makeHeader    = replaceAll "^(.{7}[^-]+) " "\\1\n  "
+trimSpaces    = replaceAll " +" " "
+splitFeatures = replaceAll "(;) " "\\1<br/>\n  "
+
+replaceAll pattern sub str = subRegex re str sub
+  where re = mkRegexWithOpts pattern True False
