@@ -1,5 +1,8 @@
 {-# LANGUAGE LambdaCase #-}
-module Main where
+module Main (main) where
+
+import Data.Time.Clock
+import Data.Time.Calendar
 
 import Text.Regex
 
@@ -12,10 +15,13 @@ type AuthorName = String
 type DateString = String
 
 main :: IO ()
-main = getArgs >>=
+main =
+  getCurrentTime >>= return . showGregorian . utctDay >>= \today ->
+  currentGitUser >>= \curUser ->
+  getArgs >>=
   (\case
-    []     -> exitFailure
-    [date] -> currentGitUser >>= \author -> return (date, author, Nothing)
+    []     -> return (today, curUser, Nothing)
+    [date] -> return (date, curUser, Nothing)
     (date:author:path:_) -> return (date, author, Just path)
     (date:author:_) -> return (date, author, Nothing)) >>=
   uncurry3 gitLog >>=
