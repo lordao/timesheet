@@ -1,6 +1,12 @@
 Timesheet
 =========
 
+Usage:
+
+timesheet <'YYYY-MM-DD'> <user> <repo>
+
+All arguments are optional
+
 According to [Wikipedia](https://en.wikipedia.org/wiki/Timesheet "Timesheet"):
 
 >A timesheet (or time sheet) is a method for recording the amount of a
