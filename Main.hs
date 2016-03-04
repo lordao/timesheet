@@ -6,6 +6,7 @@ import Data.Time.Calendar
 
 import Text.Regex
 
+import System.Directory
 import System.Environment
 import System.Exit
 import System.IO
@@ -25,9 +26,23 @@ main =
     (date:author:path:_) -> return (date, author, Just path)
     (date:author:_) -> return (date, author, Nothing)) >>=
   uncurry3 gitLog >>=
-  putStr . formatLog
+  return . formatLog >>= \log ->
+  toClipboard log >>= \copied ->
+  putStrLn $ if copied then "Copied to clipboard!" else log
 
 uncurry3 f (a, b, c) = f a b c
+
+toClipboard :: String -> IO Bool
+toClipboard string =
+  doesFileExist "/usr/bin/xclip" >>=
+  \xclipExists -> guard xclipExists $
+      createProcess process >>=
+      \(Just hIn, _, _, _) -> hPutStr hIn string
+  where
+    process = (proc "xclip" ["-selection", "clipboard"]){ std_in = CreatePipe }
+
+guard True  m = m >> return True
+guard False _ = return False
 
 currentGitUser :: IO String
 currentGitUser =
