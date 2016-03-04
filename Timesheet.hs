@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Timesheet where
 
 import Text.Regex
@@ -11,7 +12,16 @@ type AuthorName = String
 type DateString = String
 
 main :: IO ()
-main = undefined
+main = getArgs >>=
+  (\case
+    []     -> exitFailure
+    [date] -> currentGitUser >>= \author -> return (date, author, Nothing)
+    (date:author:path:_) -> return (date, author, Just path)
+    (date:author:_) -> return (date, author, Nothing)) >>=
+  uncurry3 gitLog >>=
+  putStr . formatLog
+
+uncurry3 f (a, b, c) = f a b c
 
 currentGitUser :: IO String
 currentGitUser =
