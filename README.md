@@ -3,7 +3,7 @@ Timesheet
 
 Usage:
 
-timesheet <'YYYY-MM-DD'> <user> <repo>
+timesheet < date 'YYYY-MM-DD'> < user > < repo >
 
 All arguments are optional
 
