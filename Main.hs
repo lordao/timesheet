@@ -1,5 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
-module Timesheet where
+module Main where
 
 import Text.Regex
 
