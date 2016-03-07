@@ -9,6 +9,7 @@ import Text.Regex
 import System.Directory
 import System.Environment
 import System.Exit
+import System.Hclip (setClipboard)
 import System.IO
 import System.Process
 
@@ -27,19 +28,11 @@ main =
     (date:author:_) -> return (date, author, Nothing)) >>=
   uncurry3 gitLog >>=
   return . formatLog >>= \log ->
-  toClipboard log >>= \copied ->
-  putStrLn $ if copied then "Copied to clipboard!" else log
+  setClipboard log >>
+  putStrLn "Copied to clipboard!"
 
 uncurry3 f (a, b, c) = f a b c
 
-toClipboard :: String -> IO Bool
-toClipboard string =
-  doesFileExist "/usr/bin/xclip" >>=
-  \xclipExists -> guard xclipExists $
-      createProcess process >>=
-      \(Just hIn, _, _, _) -> hPutStr hIn string
-  where
-    process = (proc "xclip" ["-selection", "clipboard"]){ std_in = CreatePipe }
 
 guard True  m = m >> return True
 guard False _ = return False
