@@ -36,8 +36,9 @@ main =
 
 mainLog :: (LogFunction, DateString, AuthorName, Maybe FilePath) -> IO ()
 mainLog (logFunction, date, author, mb_path) =
-  logFunction date author mb_path >>=
-  setClipboard >>
+  logFunction date author mb_path >>= \log ->
+  putStr log >>
+  setClipboard log >>
   putStrLn "Copied to clipboard!"
 
 currentGitUser :: IO String
@@ -77,12 +78,12 @@ gitLogDay date author mb_path =
 gitLogOnlyFiles :: DateString -> AuthorName -> Maybe FilePath -> IO String
 gitLogOnlyFiles date author mb_path =
   gitLogParams params date author mb_path >>=
-  return . unlines . nub . filter (/= "") . lines
+  return . unlines . sort . nub . filter (/= "") . lines
   where
     params = [
         "log"
       , "--author=" ++ author ++ ""
-      , "--after='" ++ date ++ "'"
+      , "--after='" ++ date ++ " 00:00'"
       , "--no-merges"
       , "--reverse"
       , "--name-only"
