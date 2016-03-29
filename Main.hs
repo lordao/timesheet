@@ -1,6 +1,8 @@
 {-# LANGUAGE LambdaCase #-}
 module Main (main) where
 
+import Control.Exception
+
 import Data.List
 import Data.Time.Clock
 import Data.Time.Calendar
@@ -10,7 +12,7 @@ import Text.Regex
 import System.Directory
 import System.Environment
 import System.Exit
-import System.Hclip (setClipboard)
+import System.Hclip
 import System.IO
 import System.Process
 
@@ -37,9 +39,15 @@ main =
 mainLog :: (LogFunction, DateString, AuthorName, Maybe FilePath) -> IO ()
 mainLog (logFunction, date, author, mb_path) =
   logFunction date author mb_path >>= \log ->
-  putStr log >>
-  setClipboard log >>
-  putStrLn "Copied to clipboard!"
+  if null log
+    then
+      putStrLn "No history for given constraints."
+    else
+      putStr log >>
+      catch (setClipboard log >> putStrLn "Copied to clipboard!") cbFail
+  where
+    cbFail :: ClipboardException -> IO ()
+    cbFail e = print e
 
 currentGitUser :: IO String
 currentGitUser =
